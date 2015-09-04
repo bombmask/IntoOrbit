@@ -17,6 +17,15 @@ AOrbitBody::AOrbitBody()
 void AOrbitBody::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	/// Calculate mass of object
+	FVector origin, bounds;
+	GetActorBounds(true, origin, bounds);
+	BoundsMass = Density * bounds.Size();
+
+	print(FString::Printf(TEXT("Actor %s mass is %f"), *GetActorLabel(), BoundsMass));
+
+	/// Set up Orbit vars
 	initDistance = FVector::Dist(RootObject->GetActorLocation(), this->GetActorLocation());
 	DeltaV = InitalDeltaV;
 	
@@ -39,7 +48,7 @@ void AOrbitBody::Tick( float DeltaTime )
 	float rad = FVector::DistSquared(RLocation, TLocation);
 
 	FVector PlanitaryForce = -(TLocation - RLocation);
-	PlanitaryForce *= (RootObject->mass * mass * .006111) / rad;
+	PlanitaryForce *= (RootObject->BoundsMass * BoundsMass * .0006111) / rad;
 
 	DeltaV = PlanitaryForce + DeltaV * DeltaV.W;
 

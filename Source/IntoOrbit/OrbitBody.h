@@ -24,13 +24,15 @@ public:
 
 	UPROPERTY(EditAnywhere)	AOrbitBody *RootObject = this;
 
-	UPROPERTY(EditAnywhere) float mass = 1.0f;
+	UPROPERTY(EditAnywhere) float Density = 1.0f;
 
 	UPROPERTY(EditAnywhere) float Distance = 0.f;
 
 	UPROPERTY(EditAnywhere)	FVector4 InitalDeltaV;
 
 	FVector4 DeltaV;
+
+	float BoundsMass;
 
 	float initDistance = 0.0f;
 	
