@@ -6,12 +6,18 @@
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::White,text)
 
 // Sets default values
-AOrbitBody::AOrbitBody()
+AOrbitBody::AOrbitBody(const FObjectInitializer & OBJ) : Super(OBJ)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	PrimaryActorTick.bStartWithTickEnabled = true;
+
+	auto MySphere = OBJ.CreateOptionalDefaultSubobject<UStaticMeshComponent>(this, TEXT("Sphere"));
+	/*MySphere->*/
+	RootComponent = MySphere;
+	
+	
 }
 
 // Called when the game starts or when spawned

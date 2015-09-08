@@ -12,7 +12,8 @@ class INTOORBIT_API AOrbitBody : public AActor
 	
 public:	
 	// Sets default values for this actor's properties
-	AOrbitBody();
+	AOrbitBody(const FObjectInitializer & OBJ);
+	
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
