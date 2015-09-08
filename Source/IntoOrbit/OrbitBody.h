@@ -22,13 +22,17 @@ public:
 
 	float RunningTime = 0.0f;
 
-	UPROPERTY(EditAnywhere)	AOrbitBody *RootObject = this;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bomb")
+		AOrbitBody *RootObject = this;
 
-	UPROPERTY(EditAnywhere) float Density = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bomb") 
+		float Density = 1.0f;
 
-	UPROPERTY(EditAnywhere) float Distance = 0.f;
+	UPROPERTY(EditAnywhere) 
+		float Distance = 0.f;
 
-	UPROPERTY(EditAnywhere)	FVector4 InitalDeltaV;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bomb")
+		FVector4 InitalDeltaV;
 
 	FVector4 DeltaV;
 
