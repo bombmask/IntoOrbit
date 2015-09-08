@@ -2,6 +2,7 @@
 
 #include "IntoOrbit.h"
 #include "OrbitBody.h"
+
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::White,text)
 
 // Sets default values
@@ -37,25 +38,27 @@ void AOrbitBody::Tick( float DeltaTime )
 	Super::Tick( DeltaTime );
 	RunningTime += DeltaTime;
 
-	//
+	// Get current Locations of reference objects
 	FVector RLocation = RootObject->GetActorLocation();
 	FVector TLocation = this->GetActorLocation();
 
-	// If is orbit model root;  NOTE: Turned off in constructor?
+	// If is orbit model root;  TODO: Turn off tick for orbit model roots
 	if (RootObject == this){ return; }
 
-	// Get current distance from planitary body
+	// Get current distance from planitary body, Bla bla bla n^2 + n1^2 of x y z
 	float rad = FVector::DistSquared(RLocation, TLocation);
-
+	
+	// Calculate force direction vector normalized
+	// EDIT: Should be normalized and then multiplied by newtons law? 
+	// Gravitational contant is scaled by the size of the world, calc for scale?
 	FVector PlanitaryForce = -(TLocation - RLocation);
-	PlanitaryForce *= (RootObject->BoundsMass * BoundsMass * .0006111) / rad;
-
+	// Newtons law applied, inverse square, universal gravitation
+	PlanitaryForce *= ((RootObject->BoundsMass * BoundsMass) * .0006111) / rad;
+	
+	// Calc movement vector, Addition of vectors handels magnitude bias
 	DeltaV = PlanitaryForce + DeltaV * DeltaV.W;
 
 	SetActorLocation(TLocation + DeltaV);
 
-	//UE_LOG(TLog, Warning TEXT("Rad is: %f"), rad);
 	//print(FString::Printf(TEXT("%s %f"), *this->GetName(), rad));
-
 }
-
