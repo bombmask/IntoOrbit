@@ -3,7 +3,7 @@
 #include "IntoOrbit.h"
 #include "OrbitBody.h"
 
-#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::White,text)
+#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.0, FColor::White,text)
 
 // Sets default values
 AOrbitBody::AOrbitBody(const FObjectInitializer & OBJ) : Super(OBJ)
@@ -86,5 +86,5 @@ void AOrbitBody::Tick( float DeltaTime )
 
 	AddActorWorldOffset(DV);
 
-	//print(FString::Printf(TEXT("%s %f"), *this->GetName(), rad));
+	print(FString::Printf(TEXT("%s ticked"), *this->GetName()));
 }
