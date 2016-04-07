@@ -33,9 +33,18 @@ void AOrbitBody::BeginPlay()
 	print(FString::Printf(TEXT("Actor %s mass is %f"), *GetActorLabel(), BoundsMass));
 
 	/// Set up Orbit vars
-	initDistance = FVector::Dist(RootObject->GetActorLocation(), this->GetActorLocation());
+	//initDistance = FVector::Dist(RootObject->GetActorLocation(), this->GetActorLocation());
 	DeltaV = InitalDeltaV;
+
+	if (isRoot) { this->SetActorTickEnabled(false); }
+
+	TSubclassOf<AOrbitBody> ClassToFind;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ClassToFind, EffectActors);
+
+	EffectActors.Remove(this);
 	
+
+
 }
 
 // Called every frame
@@ -44,27 +53,38 @@ void AOrbitBody::Tick( float DeltaTime )
 	Super::Tick( DeltaTime );
 	RunningTime += DeltaTime;
 
-	// Get current Locations of reference objects
-	FVector RLocation = RootObject->GetActorLocation();
-	FVector TLocation = this->GetActorLocation();
+	// Get our world location
+	FVector CLoc = GetActorLocation();
 
-	// If is orbit model root;  TODO: Turn off tick for orbit model roots
-	if (RootObject == this){ return; }
+	FVector DV(0.0);
 
-	// Get current distance from planitary body, Bla bla bla n^2 + n1^2 of x y z
-	float rad = FVector::DistSquared(RLocation, TLocation);
-	
-	// Calculate force direction vector normalized
-	// EDIT: Should be normalized and then multiplied by newtons law? 
-	// Gravitational contant is scaled by the size of the world, calc for scale?
-	FVector PlanitaryForce = -(TLocation - RLocation);
-	// Newtons law applied, inverse square, universal gravitation
-	PlanitaryForce *= ((RootObject->BoundsMass * BoundsMass) * .0006111) / rad;
-	
-	// Calc movement vector, Addition of vectors handels magnitude bias
-	DeltaV = PlanitaryForce + DeltaV * DeltaV.W;
+	for (auto *Body : EffectActors) {
+		float r = FVector::DistSquared(CLoc, Body->GetActorLocation());
+		FVector PlanitaryForce = (CLoc - Body->GetActorLocation());
+		PlanitaryForce.Normalize();
+		PlanitaryForce *= (((Cast<AOrbitBody>(Body)->BoundsMass * BoundsMass) * 0.0006111) / r);
+		DV += PlanitaryForce;
+	}
 
-	SetActorLocation(TLocation + DeltaV);
+	//// Get current Locations of reference objects
+	//FVector RLocation = RootObject->GetActorLocation();
+	//FVector TLocation = this->GetActorLocation();
+
+
+	//// Get current distance from planitary body, Bla bla bla n^2 + n1^2 of x y z
+	//float rad = FVector::DistSquared(RLocation, TLocation);
+	//
+	//// Calculate force direction vector normalized
+	//// EDIT: Should be normalized and then multiplied by newtons law? 
+	//// Gravitational contant is scaled by the size of the world, calc for scale?
+	//FVector PlanitaryForce = -(TLocation - RLocation);
+	//// Newtons law applied, inverse square, universal gravitation
+	//PlanitaryForce *= ((RootObject->BoundsMass * BoundsMass) * .0006111) / rad;
+	//
+	//// Calc movement vector, Addition of vectors handels magnitude bias
+	//DeltaV = PlanitaryForce + DeltaV * DeltaV.W;
+
+	AddActorWorldOffset(DV);
 
 	//print(FString::Printf(TEXT("%s %f"), *this->GetName(), rad));
 }

@@ -14,6 +14,7 @@ public:
 	// Sets default values for this actor's properties
 	AOrbitBody(const FObjectInitializer & OBJ);
 	
+	
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -22,9 +23,6 @@ public:
 	virtual void Tick( float DeltaSeconds ) override;
 
 	float RunningTime = 0.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bomb")
-		AOrbitBody *RootObject = this;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bomb") 
 		float Density = 1.0f;
@@ -40,5 +38,11 @@ public:
 	float BoundsMass;
 
 	float initDistance = 0.0f;
+
+	UPROPERTY(EditAnywhere)
+	bool isRoot = false;
+
+	UPROPERTY(EditAnywhere)
+	TArray<AActor*> EffectActors;
 	
 };
