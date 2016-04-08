@@ -5,6 +5,7 @@
 #include "GameFramework/Actor.h"
 #include "OrbitBody.generated.h"
 
+
 UCLASS()
 class INTOORBIT_API AOrbitBody : public AActor
 {
@@ -18,6 +19,8 @@ public:
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
@@ -30,10 +33,21 @@ public:
 	UPROPERTY(EditAnywhere) 
 		float Distance = 0.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bomb")
-		FVector4 InitalDeltaV;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bomb", Meta = (MakeEditWidget = true))
+		FVector InitalDeltaV;
 
-	FVector4 DeltaV;
+	UPROPERTY(Category = Comp, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+		USphereComponent* Capsule;
+
+	UPROPERTY(Category = Comp, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+		UDestructibleComponent* MySphere;
+
+
+
+	
+
+
+	FVector DeltaV;
 
 	float BoundsMass;
 
@@ -42,7 +56,13 @@ public:
 	UPROPERTY(EditAnywhere)
 	bool isRoot = false;
 
-	UPROPERTY(EditAnywhere)
-	TArray<AActor*> EffectActors;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Bomb")
+protected:
+	static TArray<AOrbitBody*> EffectActors; 
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "Util")
+	TArray<AOrbitBody*> GetOrbitBodies();
+
 	
 };

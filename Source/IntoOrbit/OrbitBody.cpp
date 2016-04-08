@@ -4,6 +4,9 @@
 #include "OrbitBody.h"
 
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.0, FColor::White,text)
+#define printl(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 10.0, FColor::White,text)
+
+TArray<AOrbitBody*> AOrbitBody::EffectActors = TArray<AOrbitBody*>();
 
 // Sets default values
 AOrbitBody::AOrbitBody(const FObjectInitializer & OBJ) : Super(OBJ)
@@ -12,18 +15,18 @@ AOrbitBody::AOrbitBody(const FObjectInitializer & OBJ) : Super(OBJ)
 	PrimaryActorTick.bCanEverTick = true;
 
 	PrimaryActorTick.bStartWithTickEnabled = true;
+	Capsule = OBJ.CreateDefaultSubobject<USphereComponent>(this, TEXT("Collision0"));
+	MySphere = OBJ.CreateDefaultSubobject<UDestructibleComponent>(this, TEXT("Sphere0"));
+	MySphere->AttachTo(Capsule);
 
-	auto MySphere = OBJ.CreateOptionalDefaultSubobject<UStaticMeshComponent>(this, TEXT("Sphere"));
-	/*MySphere->*/
-	RootComponent = MySphere;
-	
-	
+	RootComponent = Capsule;
 }
 
 // Called when the game starts or when spawned
 void AOrbitBody::BeginPlay()
 {
 	Super::BeginPlay();
+	EffectActors.Add(this);
 	
 	/// Calculate mass of object
 	FVector origin, bounds;
@@ -38,13 +41,15 @@ void AOrbitBody::BeginPlay()
 
 	if (isRoot) { this->SetActorTickEnabled(false); }
 
-	TSubclassOf<AOrbitBody> ClassToFind;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ClassToFind, EffectActors);
-
-	EffectActors.Remove(this);
+	DeltaV = InitalDeltaV / 200.0f;
 	
+	
+}
 
-
+void AOrbitBody::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	EffectActors.Remove(this);
 }
 
 // Called every frame
@@ -56,15 +61,27 @@ void AOrbitBody::Tick( float DeltaTime )
 	// Get our world location
 	FVector CLoc = GetActorLocation();
 
-	FVector DV(0.0);
+	//FVector DV(0.0);
+	
+	for (AOrbitBody *Body : GetOrbitBodies()) {
+		if (Body == this) {
+			continue;
+		}
 
-	for (auto *Body : EffectActors) {
+		if (!IsValid(Body)) {
+			EffectActors.Remove(Body);
+			continue;
+		}
 		float r = FVector::DistSquared(CLoc, Body->GetActorLocation());
-		FVector PlanitaryForce = (CLoc - Body->GetActorLocation());
+
+		FVector PlanitaryForce = -(CLoc - Body->GetActorLocation());
+
 		PlanitaryForce.Normalize();
-		PlanitaryForce *= (((Cast<AOrbitBody>(Body)->BoundsMass * BoundsMass) * 0.0006111) / r);
-		DV += PlanitaryForce;
+		PlanitaryForce *= ((((Body)->BoundsMass * BoundsMass) * 0.06111) / r);
+
+		DeltaV += PlanitaryForce;
 	}
+
 
 	//// Get current Locations of reference objects
 	//FVector RLocation = RootObject->GetActorLocation();
@@ -83,8 +100,29 @@ void AOrbitBody::Tick( float DeltaTime )
 	//
 	//// Calc movement vector, Addition of vectors handels magnitude bias
 	//DeltaV = PlanitaryForce + DeltaV * DeltaV.W;
+	FHitResult* Out = new FHitResult();
+	AddActorWorldOffset(DeltaV, true, Out);
 
-	AddActorWorldOffset(DV);
+	if (Out->bBlockingHit) {
+		Out->GetComponent()->AddImpulse(DeltaV);
+		MySphere->AddImpulse(-DeltaV);
+	
 
-	print(FString::Printf(TEXT("%s ticked"), *this->GetName()));
+	}
+	delete Out;
+
+	//print(FString::Printf(TEXT("%s %f %d ticked"), *this->GetName(), DeltaV.Size(), EffectActors.Num()));
+	const float END = 40000;
+	if (FMath::Abs(CLoc.X) > END || FMath::Abs(CLoc.Y) > END || FMath::Abs(CLoc.Z) > END) {
+		Destroy();
+
+	}
 }
+
+TArray<AOrbitBody*> AOrbitBody::GetOrbitBodies()
+{
+	return EffectActors;
+}
+
+
+
