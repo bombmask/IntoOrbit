@@ -1,0 +1,24 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "FireUI",
+	"Description": "UMG UI Code fabs",
+	"Category": "User Interface",
+	"CreatedBy": "Firestack",
+	"CreatedByURL": "Stackfire.io",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"EnabledByDefault": false,
+	"CanContainContent": true,
+	"IsBetaVersion": true,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "FireUI",
+			"Type": "Developer",
+			"LoadingPhase": "Default"
+		}
+	]
+}

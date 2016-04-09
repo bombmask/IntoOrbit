@@ -27,13 +27,15 @@ public:
 
 	float RunningTime = 0.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bomb") 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bomb", Meta = (ExposeOnSpawn = true)) 
 		float Density = 1.0f;
 
-	UPROPERTY(EditAnywhere) 
-		float Distance = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ExposeOnSpawn = true)) 
+		bool ShowDebugLines = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bomb", Meta = (MakeEditWidget = true))
+	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bomb", Meta = (MakeEditWidget = true, ExposeOnSpawn = true))
 		FVector InitalDeltaV;
 
 	UPROPERTY(Category = Comp, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))

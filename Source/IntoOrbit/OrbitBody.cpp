@@ -33,7 +33,7 @@ void AOrbitBody::BeginPlay()
 	GetActorBounds(true, origin, bounds);
 	BoundsMass = Density * bounds.Size();
 
-	print(FString::Printf(TEXT("Actor %s mass is %f"), *GetActorLabel(), BoundsMass));
+	//print(FString::Printf(TEXT("Actor %s mass is %f"), *GetActorLabel(), BoundsMass));
 
 	/// Set up Orbit vars
 	//initDistance = FVector::Dist(RootObject->GetActorLocation(), this->GetActorLocation());
@@ -77,9 +77,14 @@ void AOrbitBody::Tick( float DeltaTime )
 		FVector PlanitaryForce = -(CLoc - Body->GetActorLocation());
 
 		PlanitaryForce.Normalize();
-		PlanitaryForce *= ((((Body)->BoundsMass * BoundsMass) * 0.06111) / r);
+		PlanitaryForce *= ((((Body)->BoundsMass * BoundsMass) * 0.0006111) / r);
 
 		DeltaV += PlanitaryForce;
+	}
+	if (ShowDebugLines == true)
+	{
+
+		DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + DeltaV * 100, FColor::Green, false, 0.0);
 	}
 
 
