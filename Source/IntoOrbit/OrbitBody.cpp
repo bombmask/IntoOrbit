@@ -15,11 +15,11 @@ AOrbitBody::AOrbitBody(const FObjectInitializer & OBJ) : Super(OBJ)
 	PrimaryActorTick.bCanEverTick = true;
 
 	PrimaryActorTick.bStartWithTickEnabled = true;
-	Capsule = OBJ.CreateDefaultSubobject<USphereComponent>(this, TEXT("Collision0"));
+	//Capsule = OBJ.CreateDefaultSubobject<USphereComponent>(this, TEXT("Collision0"));
 	MySphere = OBJ.CreateDefaultSubobject<UDestructibleComponent>(this, TEXT("Sphere0"));
-	MySphere->AttachTo(Capsule);
+	//MySphere->AttachTo(Capsule);
 
-	RootComponent = Capsule;
+	RootComponent = MySphere;
 }
 
 // Called when the game starts or when spawned
