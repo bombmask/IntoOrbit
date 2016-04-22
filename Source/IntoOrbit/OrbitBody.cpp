@@ -64,28 +64,48 @@ void AOrbitBody::Tick( float DeltaTime )
 	//FVector DV(0.0);
 	
 	for (AOrbitBody *Body : GetOrbitBodies()) {
+		// I believe R^2 in this case may be 0
+		// Also, We don't need to have force on ourself
 		if (Body == this) {
 			continue;
 		}
-
+		
+		// Checking from old code.
+		// I used to do a call for get all actors of class but now 
+		// we just add ourselves to the static array in the class.
+		// this avoids any issues if a body is about to leave the
+		// bounds zone and is scheduled for destruction
 		if (!IsValid(Body)) {
 			EffectActors.Remove(Body);
 			continue;
 		}
+		
+		// We only need R^2, therefore DistSquared is less expensive
+		// and only does what we need. This is used for force calcuation
+		// The inverse square law
 		float r = FVector::DistSquared(CLoc, Body->GetActorLocation());
 
+		// Get vector force from this body to their body. 
+		// I feel like there may need to be a mass test here.
+		// because earth moves to moons instead of the oposite
 		FVector PlanitaryForce = -(CLoc - Body->GetActorLocation());
 
 		PlanitaryForce.Normalize();
-		PlanitaryForce *= ((((Body)->BoundsMass * BoundsMass) * 0.0006111) / r);
-
+		
+		// Force = G(constant) * (M1 * M2 / r^2)
+		PlanitaryForce *= ((Body->BoundsMass * BoundsMass) / r)* 0.0006111;
+		
+		// Accumulate Current delta velocity
 		DeltaV += PlanitaryForce;
 	}
+	// These are DEBUG lines
+	// No reason to do a dumb if check if draw debug will fail anyway
+	#ifndef UE_BUILD_SHIPPING
 	if (ShowDebugLines == true)
 	{
-
 		DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + DeltaV * 100, FColor::Green, false, 0.0);
 	}
+	#end
 
 
 	//// Get current Locations of reference objects
@@ -94,17 +114,9 @@ void AOrbitBody::Tick( float DeltaTime )
 
 
 	//// Get current distance from planitary body, Bla bla bla n^2 + n1^2 of x y z
-	//float rad = FVector::DistSquared(RLocation, TLocation);
-	//
-	//// Calculate force direction vector normalized
-	//// EDIT: Should be normalized and then multiplied by newtons law? 
 	//// Gravitational contant is scaled by the size of the world, calc for scale?
-	//FVector PlanitaryForce = -(TLocation - RLocation);
 	//// Newtons law applied, inverse square, universal gravitation
-	//PlanitaryForce *= ((RootObject->BoundsMass * BoundsMass) * .0006111) / rad;
-	//
-	//// Calc movement vector, Addition of vectors handels magnitude bias
-	//DeltaV = PlanitaryForce + DeltaV * DeltaV.W;
+
 	FHitResult* Out = new FHitResult();
 	AddActorWorldOffset(DeltaV, true, Out);
 
@@ -114,9 +126,9 @@ void AOrbitBody::Tick( float DeltaTime )
 	
 
 	}
+	// delete what you new
 	delete Out;
-
-	//print(FString::Printf(TEXT("%s %f %d ticked"), *this->GetName(), DeltaV.Size(), EffectActors.Num()));
+	
 	const float END = 40000;
 	if (FMath::Abs(CLoc.X) > END || FMath::Abs(CLoc.Y) > END || FMath::Abs(CLoc.Z) > END) {
 		Destroy();
@@ -124,6 +136,10 @@ void AOrbitBody::Tick( float DeltaTime )
 	}
 }
 
+// This is a super cool accessor function to access static variables
+// for this class in unreal so that I'm not calling "get all actors of class"
+// Every single frame
+// Also actors Add and Delete from this Var on Begin and End Play
 TArray<AOrbitBody*> AOrbitBody::GetOrbitBodies()
 {
 	return EffectActors;
