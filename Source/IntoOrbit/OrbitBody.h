@@ -39,7 +39,7 @@ public:
 		FVector InitalDeltaV;
 
 	UPROPERTY(Category = Comp, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-		USphereComponent* Capsule;
+		UStaticMeshComponent* Mesh0;
 
 	UPROPERTY(Category = Comp, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		UDestructibleComponent* MySphere;
@@ -65,6 +65,8 @@ protected:
 public:
 	UFUNCTION(BlueprintCallable, Category = "Util")
 	TArray<AOrbitBody*> GetOrbitBodies();
+
+	static TArray<AOrbitBody*> GetOrbitBodiesStatic();
 
 	
 };

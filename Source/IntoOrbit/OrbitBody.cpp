@@ -15,11 +15,19 @@ AOrbitBody::AOrbitBody(const FObjectInitializer & OBJ) : Super(OBJ)
 	PrimaryActorTick.bCanEverTick = true;
 
 	PrimaryActorTick.bStartWithTickEnabled = true;
-	//Capsule = OBJ.CreateDefaultSubobject<USphereComponent>(this, TEXT("Collision0"));
-	MySphere = OBJ.CreateDefaultSubobject<UDestructibleComponent>(this, TEXT("Sphere0"));
-	//MySphere->AttachTo(Capsule);
-
-	RootComponent = MySphere;
+	PrimaryActorTick.bRunOnAnyThread = true;
+	PrimaryActorTick.bHighPriority = true;
+	
+	Mesh0 = OBJ.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("Mesh0"));
+	//MySphere = OBJ.CreateOptionalDefaultSubobject<UDestructibleComponent>(this, TEXT("Sphere0"));
+	
+	//MySphere->AttachTo(RootComponent);
+	//RootComponent = MySphere;
+	RootComponent = Mesh0;
+	//Mesh0->SetSimulatePhysics(true);
+	Mesh0->SetSimulatePhysics(true);
+	
+	
 }
 
 // Called when the game starts or when spawned
@@ -41,7 +49,7 @@ void AOrbitBody::BeginPlay()
 
 	if (isRoot) { this->SetActorTickEnabled(false); }
 
-	DeltaV = InitalDeltaV / 200.0f;
+	DeltaV = InitalDeltaV / 10.0f;
 	
 	
 }
@@ -93,11 +101,12 @@ void AOrbitBody::Tick( float DeltaTime )
 		PlanitaryForce.Normalize();
 		
 		// Force = G(constant) * (M1 * M2 / r^2)
-		PlanitaryForce *= ((Body->BoundsMass * BoundsMass) / r)* 0.0006111;
+		PlanitaryForce *= ((Body->BoundsMass * BoundsMass) / r)* 0.06111;
 		
 		// Accumulate Current delta velocity
 		DeltaV += PlanitaryForce;
 	}
+	
 	// These are DEBUG lines
 	// No reason to do a dumb if check if draw debug will fail anyway
 	#ifndef UE_BUILD_SHIPPING
@@ -105,7 +114,7 @@ void AOrbitBody::Tick( float DeltaTime )
 	{
 		DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + DeltaV * 100, FColor::Green, false, 0.0);
 	}
-	#end
+	#endif
 
 
 	//// Get current Locations of reference objects
@@ -117,18 +126,9 @@ void AOrbitBody::Tick( float DeltaTime )
 	//// Gravitational contant is scaled by the size of the world, calc for scale?
 	//// Newtons law applied, inverse square, universal gravitation
 
-	FHitResult* Out = new FHitResult();
-	AddActorWorldOffset(DeltaV, true, Out);
-
-	if (Out->bBlockingHit) {
-		Out->GetComponent()->AddImpulse(DeltaV);
-		MySphere->AddImpulse(-DeltaV);
-	
-
-	}
-	// delete what you new
-	delete Out;
-	
+	//AddActorWorldOffset(DeltaV, true);
+	Mesh0->SetPhysicsLinearVelocity(DeltaV, false);
+	// Out of bounds objects
 	const float END = 40000;
 	if (FMath::Abs(CLoc.X) > END || FMath::Abs(CLoc.Y) > END || FMath::Abs(CLoc.Z) > END) {
 		Destroy();
@@ -145,5 +145,8 @@ TArray<AOrbitBody*> AOrbitBody::GetOrbitBodies()
 	return EffectActors;
 }
 
-
+TArray<AOrbitBody*> AOrbitBody::GetOrbitBodiesStatic()
+{
+	return EffectActors;
+}
 
